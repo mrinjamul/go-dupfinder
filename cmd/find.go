@@ -74,7 +74,7 @@ func findRun(cmd *cobra.Command, args []string) {
 	// get path
 	path := args[0]
 	// all files list
-	var filepath []string
+	var allFiles []string
 	// unique files list
 	var uniqueFiles []string
 	// duplicate files list
@@ -85,7 +85,7 @@ func findRun(cmd *cobra.Command, args []string) {
 	var hashMap = make(map[string]string)
 
 	// get all files from the given path
-	filepath, err := app.GetFiles(path)
+	allFiles, err := app.GetFiles(path)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -94,11 +94,11 @@ func findRun(cmd *cobra.Command, args []string) {
 	// print finding duplicates
 	fmt.Println("Finding duplicates...")
 
-	for _, file := range filepath {
+	for _, file := range allFiles {
 		sum, err := app.Sha256sum(file)
 		if err != nil {
 			fmt.Println(err)
-			return
+			continue
 		}
 		if !app.ContainsString(uniqueHash, sum) {
 			uniqueHash = append(uniqueHash, sum)
@@ -107,19 +107,19 @@ func findRun(cmd *cobra.Command, args []string) {
 	}
 
 	uniqueFiles = app.GetUniqueFiles(hashMap, uniqueHash)
-	duplicateFiles = app.GetDuplicateFiles(filepath, uniqueFiles)
+	duplicateFiles = app.GetDuplicateFiles(allFiles, uniqueFiles)
 	fmt.Print("Duplicate files :")
 	app.PrintFiles(duplicateFiles)
 	fmt.Print("Unique files :")
 	app.PrintFiles(uniqueFiles)
-	fmt.Println("Total files :", len(filepath))
+	fmt.Println("Total files :", len(allFiles))
 	fmt.Println("Unique files founds :", len(uniqueFiles))
 	// print how many duplicate founds
 	fmt.Println("Duplicate files founds :", len(duplicateFiles))
 	// For flagDelete
 	if flagDelete {
 		app.DeleteAllFiles(duplicateFiles)
-	} else {
+	} else if len(duplicateFiles) != 0 {
 		// prompt to ask user if want to remove duplicates
 		ok := app.Confirm("Do you want to delete duplicate files?")
 		if ok {
