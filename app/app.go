@@ -18,10 +18,8 @@ func Sha256sum(filename string) (string, error) {
 		return "", errors.New("file does not exist")
 	}
 	// check if a file or directory
-	if isDir, err := IsDir(filename); err != nil {
+	if isDir, _ := IsDir(filename); isDir {
 		return "", nil
-	} else if isDir {
-		return "", errors.New("path is a directory")
 	}
 
 	f, err := os.Open(filename)
@@ -78,7 +76,7 @@ func GetFiles(path string) ([]string, error) {
 	}
 
 	for _, f := range files {
-		if isDir, _ := IsDir(f.Name()); isDir {
+		if isDir, _ := IsDir(path + "/" + f.Name()); isDir {
 			continue
 		}
 		filepaths = append(filepaths, path+"/"+f.Name())

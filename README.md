@@ -17,4 +17,4 @@ go build -ldflags="-X 'github.com/mrinjamul/go-dupfinder/app.Version=$(git descr
 
 ## License
 
-open-sourced under (MIT License)[LICENSE]
+open-sourced under [MIT License](LICENSE)
