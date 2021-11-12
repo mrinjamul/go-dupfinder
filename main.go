@@ -23,14 +23,6 @@ package main
 
 import "github.com/mrinjamul/go-dupfinder/cmd"
 
-// TODO: implement global versioning system
-var (
-	AppName = "go-dupfinder"
-	Version = "dev"
-	Commit  = "none"
-	Date    = "unknown"
-)
-
 func main() {
 	cmd.Execute()
 }

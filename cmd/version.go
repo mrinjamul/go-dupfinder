@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/mrinjamul/go-dupfinder/app"
 	"github.com/spf13/cobra"
 )
 
@@ -50,5 +51,6 @@ func init() {
 }
 
 func versionRun(cmd *cobra.Command, args []string) {
-	fmt.Println("go-dupfinder version 0.0.0")
+	// Print version with commit and build date
+	fmt.Println(app.AppName + " " + app.Version + " " + app.CommitHash + "+" + app.BuildDate)
 }

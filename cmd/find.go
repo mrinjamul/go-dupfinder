@@ -31,8 +31,8 @@ import (
 // findCmd represents the find command
 var findCmd = &cobra.Command{
 	Use:   "find",
-	Short: "Find duplicate files by sha256sum",
-	Long:  `Find duplicate files by sha256sum`,
+	Short: "Find duplicate files",
+	Long:  `Find duplicate files`,
 	Run:   findRun,
 }
 
@@ -61,43 +61,33 @@ func findRun(cmd *cobra.Command, args []string) {
 		fmt.Println("Please provide a path")
 		return
 	}
-	path := args[0]
-	var filepath []string
-	// var hashMap = make(map[string][]string)
-	var hashs []string
-	dupCount := 0
-
-	filepath, err := app.GetFiles(path)
-	if err != nil {
+	// chech if argument is a valid path
+	if _, err := app.IsValidPath(args[0]); err != nil {
 		fmt.Println(err)
 		return
 	}
+	// check if argument is more than 1
+	if len(args) > 1 {
+		fmt.Println("Please provide only one path")
+		return
+	}
+	// get path
+	path := args[0]
+	// all files list
+	var filepath []string
+	// unique files list
+	var uniqueFiles []string
+	// duplicate files list
+	var duplicateFiles []string
+	// unique hashes
+	var uniqueHash []string
+	// hash Maps
+	var hashMap = make(map[string]string)
 
-	app.PrintFiles(filepath)
-
-	if flagDelete {
-		fmt.Println("Finding and Deleting duplicates...")
-		for _, file := range filepath {
-			sum, err := app.Sha256sum(file)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			if app.ContainsString(hashs, sum) {
-				dupCount++
-				err := app.DeleteFile(file)
-				if err != nil {
-					fmt.Println(err)
-				}
-			} else {
-				hashs = append(hashs, sum)
-			}
-
-			// print hash sum
-			// fmt.Println(app.GetFileName(file) + " : " + sum)
-		}
-		// print how many duplicate founds
-		fmt.Println("Duplicate founds :", dupCount)
+	// get all files from the given path
+	filepath, err := app.GetFiles(path)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -110,15 +100,30 @@ func findRun(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			return
 		}
-		if app.ContainsString(hashs, sum) {
-			dupCount++
-		} else {
-			hashs = append(hashs, sum)
+		if !app.ContainsString(uniqueHash, sum) {
+			uniqueHash = append(uniqueHash, sum)
+			hashMap[sum] = file
 		}
-
-		// print hash sum
-		// fmt.Println(app.GetFileName(file) + " : " + sum)
 	}
+
+	uniqueFiles = app.GetUniqueFiles(hashMap, uniqueHash)
+	duplicateFiles = app.GetDuplicateFiles(filepath, uniqueFiles)
+	fmt.Print("Duplicate files :")
+	app.PrintFiles(duplicateFiles)
+	fmt.Print("Unique files :")
+	app.PrintFiles(uniqueFiles)
+	fmt.Println("Total files :", len(filepath))
+	fmt.Println("Unique files founds :", len(uniqueFiles))
 	// print how many duplicate founds
-	fmt.Println("Duplicate founds :", dupCount)
+	fmt.Println("Duplicate files founds :", len(duplicateFiles))
+	// For flagDelete
+	if flagDelete {
+		app.DeleteAllFiles(duplicateFiles)
+	} else {
+		// prompt to ask user if want to remove duplicates
+		ok := app.Confirm("Do you want to delete duplicate files?")
+		if ok {
+			app.DeleteAllFiles(duplicateFiles)
+		}
+	}
 }

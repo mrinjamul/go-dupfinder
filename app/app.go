@@ -47,6 +47,14 @@ func IsDir(path string) (bool, error) {
 	return fileInfo.IsDir(), nil
 }
 
+// IsValidPath check if the path is valid
+func IsValidPath(path string) (bool, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false, errors.New("path does not exist")
+	}
+	return true, nil
+}
+
 // GetFileName will return the file name from a directorys path
 func GetFileName(path string) string {
 	return strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
@@ -108,4 +116,46 @@ func DeleteFile(path string) error {
 	return nil
 }
 
-// TODO: refactor
+// DeleteAllFiles will delete all files in array
+func DeleteAllFiles(files []string) {
+	for _, f := range files {
+		DeleteFile(f)
+	}
+}
+
+// GetUniqueFiles return unique files
+func GetUniqueFiles(hashMap map[string]string, hash []string) []string {
+	var uniqueFiles []string
+	for _, f := range hash {
+		uniqueFiles = append(uniqueFiles, hashMap[f])
+	}
+	return uniqueFiles
+}
+
+// GetDuplicateFiles return duplicate files
+func GetDuplicateFiles(AllFiles []string, uniqueFiles []string) []string {
+	// subtract unique files from all files
+	var duplicateFiles []string
+	for _, f := range AllFiles {
+		if !ContainsString(uniqueFiles, f) {
+			duplicateFiles = append(duplicateFiles, f)
+		}
+	}
+	return duplicateFiles
+}
+
+// ConfirmPrompt will prompt to user for yes or no
+func Confirm(message string) bool {
+	var response string
+	fmt.Print(message + " (yes/no) :")
+	fmt.Scanln(&response)
+
+	switch strings.ToLower(response) {
+	case "y", "yes":
+		return true
+	case "n", "no":
+		return false
+	default:
+		return false
+	}
+}

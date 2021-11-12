@@ -36,8 +36,10 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "go-dupfinder",
-	Short: "go-dupfinder",
-	Long:  `go-dupfinder`,
+	Short: "go-dupfinder: a duplicate file finder",
+	Long: `
+	go-dupfinder: a duplicate file finder that will help you
+	clean up files effectively and easily.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
