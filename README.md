@@ -14,3 +14,7 @@ For Production,
 ```sh
 go build -ldflags="-X 'github.com/mrinjamul/go-dupfinder/app.Version=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "dev")' -X 'github.com/mrinjamul/go-dupfinder/app.BuildDate=$(date "+%m-%d-%Y %H:%M:%S")' -X 'github.com/mrinjamul/go-dupfinder/app.CommitHash=$(git rev-parse HEAD)'"
 ```
+
+## License
+
+open-sourced under (MIT License)[LICENSE]
