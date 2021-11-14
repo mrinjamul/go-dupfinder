@@ -1,4 +1,4 @@
-/*
+/* Package cmd ...
 Copyright © 2021 Injamul Mohammad Mollah <mrinjamul@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,5 +52,5 @@ func init() {
 
 func versionRun(cmd *cobra.Command, args []string) {
 	// Print version with commit and build date
-	fmt.Println(app.AppName + " " + app.Version + " " + app.CommitHash + "+" + app.BuildDate)
+	fmt.Println(app.AppName + " " + app.Version + "+" + app.CommitHash + " " + app.BuildDate)
 }

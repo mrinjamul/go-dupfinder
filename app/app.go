@@ -53,7 +53,7 @@ func IsValidPath(path string) (bool, error) {
 	return true, nil
 }
 
-// GetFileName will return the file name from a directorys path
+// GetFileName will return the file name from a directory path
 func GetFileName(path string) string {
 	return strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
 }
@@ -67,7 +67,7 @@ func ListDir(path string) ([]fs.FileInfo, error) {
 	return files, nil
 }
 
-// GetFiles will return the file name from a directorys path
+// GetFiles will return the file name from a directory path
 func GetFiles(path string) ([]string, error) {
 	var filepaths []string
 	files, err := ioutil.ReadDir(path)
@@ -142,7 +142,7 @@ func GetDuplicateFiles(AllFiles []string, uniqueFiles []string) []string {
 	return duplicateFiles
 }
 
-// ConfirmPrompt will prompt to user for yes or no
+// Confirm will prompt to user for yes or no
 func Confirm(message string) bool {
 	var response string
 	fmt.Print(message + " (yes/no) :")

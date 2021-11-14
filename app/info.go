@@ -1,8 +1,12 @@
 package app
 
 var (
-	AppName    = "go-dupfinder"
-	Version    = "dev"
+	// AppName is the name of the application
+	AppName = "go-dupfinder"
+	// Version is the version of the application
+	Version = "dev"
+	// CommitHash is the last commit hash when the application is built
 	CommitHash = "none"
-	BuildDate  = "unknown"
+	// BuildDate is the date when the application is built
+	BuildDate = "unknown"
 )
