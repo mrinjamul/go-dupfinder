@@ -77,7 +77,11 @@ func GetFiles(path string) ([]string, error) {
 
 	for _, f := range files {
 		if isDir, _ := IsDir(path + "/" + f.Name()); isDir {
-			continue
+			filesfromSubDir, err := GetFiles(path + "/" + f.Name())
+			if err != nil {
+				continue
+			}
+			filepaths = append(filepaths, filesfromSubDir...)
 		}
 		filepaths = append(filepaths, path+"/"+f.Name())
 	}
@@ -97,7 +101,7 @@ func ContainsString(s []string, e string) bool {
 // PrintFiles will print files in pretter style
 func PrintFiles(filePaths []string) {
 	for _, f := range filePaths {
-		fmt.Print(" " + GetFileName(f))
+		fmt.Print(" " + f)
 	}
 	fmt.Println()
 }
