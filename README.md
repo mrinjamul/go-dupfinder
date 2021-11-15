@@ -2,6 +2,8 @@
 
 We are currently working on a tool that will find duplicate files in a directory.
 
+Note: Always use latest version
+
 ## WIP : use it at your own risk
 
 Work in progress.

@@ -23,7 +23,9 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/mrinjamul/go-dupfinder/app"
 	"github.com/spf13/cobra"
 )
@@ -92,7 +94,11 @@ func findRun(cmd *cobra.Command, args []string) {
 	}
 
 	// print finding duplicates
-	fmt.Println("Finding duplicates...")
+	spin := spinner.New(spinner.CharSets[11], 100*time.Millisecond) // Build our new spinner
+	spin.Suffix = " Finding Duplicate files..."
+	spin.FinalMSG = "\nProcess Complete !\n"
+	spin.Color("green", "bold") // Set the spinner color to a bold green
+	spin.Start()                // Start the spinner
 
 	for _, file := range allFiles {
 		sum, err := app.Sha256sum(file)
@@ -106,22 +112,35 @@ func findRun(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	spin.Stop() // stop the spinner
+
 	uniqueFiles = app.GetUniqueFiles(hashMap, uniqueHash)
 	duplicateFiles = app.GetDuplicateFiles(allFiles, uniqueFiles)
-	fmt.Print("Duplicate files :")
-	app.PrintFiles(duplicateFiles)
-	fmt.Print("Unique files :")
-	app.PrintFiles(uniqueFiles)
-	fmt.Println("Total files :", len(allFiles))
-	fmt.Println("Unique files founds :", len(uniqueFiles))
-	// print how many duplicate founds
-	fmt.Println("Duplicate files founds :", len(duplicateFiles))
+
+	// Print file statistics
+	fmt.Println("Total file(s):", (len(allFiles)),
+		" Unique file(s):", len(uniqueFiles),
+		" Duplicate file(s):", len(duplicateFiles))
+
+	// print duplicate files
+	if len(duplicateFiles) != 0 {
+		if ok := app.Confirm("Press y to view duplicate file(s)"); ok {
+			app.PrintFiles(duplicateFiles)
+		}
+	}
+	// print unique file(s)
+	if len(duplicateFiles) != 0 {
+		if ok := app.Confirm("Press y to view unique file(s)"); ok {
+			app.PrintFiles(uniqueFiles)
+		}
+	}
+
 	// For flagDelete
 	if flagDelete {
 		app.DeleteAllFiles(duplicateFiles)
 	} else if len(duplicateFiles) != 0 {
 		// prompt to ask user if want to remove duplicates
-		ok := app.Confirm("Do you want to delete duplicate files?")
+		ok := app.Confirm("Do you want to delete duplicate files? (y/n)")
 		if ok {
 			app.DeleteAllFiles(duplicateFiles)
 		}

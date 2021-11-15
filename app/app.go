@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // Sha256sum will hash the file and return the sha256sum
@@ -77,11 +79,16 @@ func GetFiles(path string) ([]string, error) {
 
 	for _, f := range files {
 		if isDir, _ := IsDir(path + "/" + f.Name()); isDir {
+			// ignore git files
+			if f.Name() == ".git" {
+				continue
+			}
 			filesfromSubDir, err := GetFiles(path + "/" + f.Name())
 			if err != nil {
 				continue
 			}
 			filepaths = append(filepaths, filesfromSubDir...)
+			continue
 		}
 		filepaths = append(filepaths, path+"/"+f.Name())
 	}
@@ -100,8 +107,14 @@ func ContainsString(s []string, e string) bool {
 
 // PrintFiles will print files in pretter style
 func PrintFiles(filePaths []string) {
-	for _, f := range filePaths {
-		fmt.Print(" " + f)
+	for id, f := range filePaths {
+		cfmt := color.New(color.FgCyan)
+		if id%2 == 0 {
+			cfmt.Printf(" " + f)
+			continue
+		}
+		cfmt = color.New(color.FgBlue)
+		cfmt.Print(" " + f)
 	}
 	fmt.Println()
 }
@@ -140,6 +153,9 @@ func GetDuplicateFiles(AllFiles []string, uniqueFiles []string) []string {
 	var duplicateFiles []string
 	for _, f := range AllFiles {
 		if !ContainsString(uniqueFiles, f) {
+			if isDir, _ := IsDir(f); isDir {
+				continue
+			}
 			duplicateFiles = append(duplicateFiles, f)
 		}
 	}
@@ -149,7 +165,7 @@ func GetDuplicateFiles(AllFiles []string, uniqueFiles []string) []string {
 // Confirm will prompt to user for yes or no
 func Confirm(message string) bool {
 	var response string
-	fmt.Print(message + " (yes/no) :")
+	fmt.Print(message + " :")
 	fmt.Scanln(&response)
 
 	switch strings.ToLower(response) {
