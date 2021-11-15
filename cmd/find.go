@@ -86,12 +86,19 @@ func findRun(cmd *cobra.Command, args []string) {
 	// hash Maps
 	var hashMap = make(map[string]string)
 
+	//
+	spinIndex := spinner.New(spinner.CharSets[11], 100*time.Millisecond) // Build our new spinner
+	spinIndex.Suffix = " Indexing folder and files..."
+	spinIndex.FinalMSG = "\nProcess Complete !\n"
+	spinIndex.Color("green", "bold") // Set the spinner color to a bold green
+	spinIndex.Start()                // Start the spinner
 	// get all files from the given path
 	allFiles, err := app.GetFiles(path)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	spinIndex.Stop() // stop indexing spinner
 
 	// print finding duplicates
 	spin := spinner.New(spinner.CharSets[11], 100*time.Millisecond) // Build our new spinner
