@@ -70,7 +70,7 @@ func ListDir(path string) ([]fs.FileInfo, error) {
 }
 
 // GetFiles will return the file name from a directory path
-func GetFiles(path string) ([]string, error) {
+func GetFiles(path string, recursive bool) ([]string, error) {
 	var filepaths []string
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -79,11 +79,14 @@ func GetFiles(path string) ([]string, error) {
 
 	for _, f := range files {
 		if isDir, _ := IsDir(path + "/" + f.Name()); isDir {
+			if !recursive {
+				continue
+			}
 			// ignore git files
 			if f.Name() == ".git" {
 				continue
 			}
-			filesfromSubDir, err := GetFiles(path + "/" + f.Name())
+			filesfromSubDir, err := GetFiles(path+"/"+f.Name(), recursive)
 			if err != nil {
 				continue
 			}

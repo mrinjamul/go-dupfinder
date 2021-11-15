@@ -39,7 +39,8 @@ var findCmd = &cobra.Command{
 }
 
 var (
-	flagDelete bool
+	flagDelete  bool
+	flagRecurse bool
 )
 
 func init() {
@@ -54,6 +55,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	findCmd.Flags().BoolVarP(&flagDelete, "delete", "d", false, "Find and delete files")
+	findCmd.Flags().BoolVarP(&flagRecurse, "recursive", "r", false, "enable recursive file indexing")
 	// findCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
@@ -93,7 +95,7 @@ func findRun(cmd *cobra.Command, args []string) {
 	spinIndex.Color("green", "bold") // Set the spinner color to a bold green
 	spinIndex.Start()                // Start the spinner
 	// get all files from the given path
-	allFiles, err := app.GetFiles(path)
+	allFiles, err := app.GetFiles(path, flagRecurse)
 	if err != nil {
 		fmt.Println(err)
 		return
