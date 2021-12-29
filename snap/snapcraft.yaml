@@ -1,0 +1,25 @@
+name: go-dupfinder
+base: core18 # the base snap is the execution environment for this snap
+version: "0.1.2"
+summary: A Simple duplicate file finder
+description: |
+  A Simple duplicate file finder.
+
+grade: stable
+confinement: strict
+
+apps:
+  go-dupfinder:
+    command: go-dupfinder
+
+parts:
+  go-dupfinder:
+    plugin: go
+    source: .
+    go-importpath: go-dupfinder
+
+plugs:
+  go-dupfinder-home:
+    interface: home
+  go-dupfinder-removable-media:
+    interface: removable-media
