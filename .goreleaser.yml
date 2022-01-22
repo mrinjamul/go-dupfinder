@@ -1,0 +1,81 @@
+# GoReleaser config
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    ldflags: -X github.com/mrinjamul/go-dupfinder/app.Version={{ .Tag }} -X github.com/mrinjamul/go-dupfinder/app.GitCommit={{ .FullCommit }} -s -w
+    goos:
+      - linux
+      - windows
+      - darwin
+      - freebsd
+      - openbsd
+      - netbsd
+    goarch:
+      - amd64
+      - arm64
+      - "386"
+      - arm
+    goarm:
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarm: "7"
+
+nfpms:
+  - vendor: mrinjamul
+    homepage: https://github.com/mrinjamul/go-dupfinder
+    maintainer: "Injamul M <mrinjamul@gmail.com>"
+    description: "Duplicate File Finder"
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+
+brews:
+  - tap:
+      owner: mrinjamul
+      name: homebrew-main
+      branch: main
+    homepage: https://github.com/mrinjamul/go-dupfinder
+    description: "Duplicate File Finder"
+    license: ""
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    folder: Formula
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-dev"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+  groups:
+    - title: "New Features"
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: "Bug fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 10
+    - title: Others
+      order: 999
+# dockers:
+#   - image_templates:
+#     - "username/image:{{ .Tag }}"
+
+release:
+  footer: |
+    * * *
+    Thoughts? Questions? We love hearing from you. Feel free to reach out on [Mail](mailto:mrinjamul@pm.me).

@@ -1,61 +1,27 @@
 name: release
+
 on:
   push:
     tags:
       - v*
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        GOOS: [darwin, linux, windows]
-        GOARCH: [amd64]
-        include:
-          - GOOS: darwin
-            GOARCH: amd64
-            suffix: darwin-amd64
-          - GOOS: windows
-            GOARCH: amd64
-            suffix: windows-amd64.exe
-          - GOOS: linux
-            GOARCH: amd64
-            suffix: linux-amd64
-          - GOOS: linux
-            GOARCH: arm
-            suffix: linux-armv7
-          - GOOS: linux
-            GOARCH: arm64
-            suffix: linux-aarch64
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          go-version: 1.16.x
-      - name: Build ${{ matrix.suffix }} (GOOS=${{ matrix.GOOS }}, GOARCH=${{ matrix.GOARCH }})
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
         env:
-          GOOS: ${{ matrix.GOOS }}
-          GOARCH: ${{ matrix.GOARCH }}
-        run: |
-          go version
-          go build -ldflags="-X 'github.com/mrinjamul/go-dupfinder/app.Version=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "dev")' -X 'github.com/mrinjamul/go-dupfinder/app.BuildDate=$(date -u --rfc-2822)' -X 'github.com/mrinjamul/go-dupfinder/app.CommitHash=$(git rev-parse HEAD)'" -o ./artifacts/go-dupfinder-${GITHUB_REF##*/}-${{ matrix.suffix }}
-      - uses: actions/upload-artifact@v2
-        name: Upload artifacts
-        with:
-          name: artifacts
-          path: ./artifacts
-
-  release:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - uses: actions/download-artifact@v2
-        name: Download artifacts
-        with:
-          name: artifacts
-          path: ./artifacts
-      - name: Publish artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          files: "./artifacts/*"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_ACTION_TOKEN }}

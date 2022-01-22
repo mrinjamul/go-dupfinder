@@ -15,7 +15,7 @@ I will complete this project in my spare time later.
 For Production,
 
 ```sh
-go build -ldflags="-X 'github.com/mrinjamul/go-dupfinder/app.Version=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "dev")' -X 'github.com/mrinjamul/go-dupfinder/app.BuildDate=$(date -u --rfc-2822)' -X 'github.com/mrinjamul/go-dupfinder/app.CommitHash=$(git rev-parse HEAD)'"
+go build -ldflags="-X 'github.com/mrinjamul/go-dupfinder/app.Version=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "dev")' -X 'github.com/mrinjamul/go-dupfinder/app.GitCommit=$(git rev-parse HEAD)'"
 ```
 
 ## License

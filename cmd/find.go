@@ -41,6 +41,7 @@ var findCmd = &cobra.Command{
 var (
 	flagDelete  bool
 	flagRecurse bool
+	flagExclude string
 )
 
 func init() {
@@ -56,6 +57,7 @@ func init() {
 	// is called directly, e.g.:
 	findCmd.Flags().BoolVarP(&flagDelete, "delete", "d", false, "Find and delete files")
 	findCmd.Flags().BoolVarP(&flagRecurse, "recursive", "r", false, "enable recursive file indexing")
+	findCmd.Flags().StringVarP(&flagExclude, "exclude", "x", "", "files to exclude")
 	// findCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
@@ -74,6 +76,15 @@ func findRun(cmd *cobra.Command, args []string) {
 	if len(args) > 1 {
 		fmt.Println("Please provide only one path")
 		return
+	}
+	// check if exclude flag is set
+	if flagExclude != "" {
+		fmt.Println("Exclude flag is not supported yet")
+		fmt.Println("And will be supported in next release")
+		// if _, err := app.IsValidPath(flagExclude); err != nil {
+		// 	fmt.Println(err)
+		// 	return
+		// }
 	}
 	// get path
 	path := args[0]

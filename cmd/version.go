@@ -51,6 +51,17 @@ func init() {
 }
 
 func versionRun(cmd *cobra.Command, args []string) {
+	shortCommit := shortGitCommit(app.GitCommit)
 	// Print version with commit and build date
-	fmt.Println(app.AppName + " " + app.Version + "+" + app.CommitHash + " " + app.BuildDate)
+	fmt.Println(app.AppName + " " + app.Version + "-" + shortCommit)
+}
+
+// shortGitCommit returns the short form of the git commit hash
+func shortGitCommit(fullGitCommit string) string {
+	var shortCommit string
+	if len(fullGitCommit) >= 6 {
+		shortCommit = fullGitCommit[0:6]
+	}
+
+	return shortCommit
 }
