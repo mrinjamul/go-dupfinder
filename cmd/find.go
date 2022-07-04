@@ -39,9 +39,12 @@ var findCmd = &cobra.Command{
 }
 
 var (
-	flagDelete  bool
-	flagRecurse bool
-	flagExclude string
+	flagDelete    bool
+	flagSoftLink  bool
+	flagHardLink  bool
+	flagOmitEmpty bool
+	flagRecurse   bool
+	flagExclude   string
 )
 
 func init() {
@@ -56,12 +59,33 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	findCmd.Flags().BoolVarP(&flagDelete, "delete", "d", false, "Find and delete files")
+	findCmd.Flags().BoolVarP(&flagSoftLink, "soft", "s", false, "Find and create soft links")
+	findCmd.Flags().BoolVar(&flagHardLink, "hard", false, "Find and create hard links")
+	findCmd.Flags().BoolVarP(&flagOmitEmpty, "omitempty", "e", false, "Omit empty directories")
 	findCmd.Flags().BoolVarP(&flagRecurse, "recursive", "r", false, "enable recursive file indexing")
 	findCmd.Flags().StringVarP(&flagExclude, "exclude", "x", "", "files to exclude")
 	// findCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func findRun(cmd *cobra.Command, args []string) {
+	// all files list
+	var allFiles []string
+	// excludeFiles []string
+	var excludeFiles []string
+	// unique files list
+	var uniqueFiles []string
+	// duplicate files list
+	var duplicateFiles []string
+	// unique hashes
+	var uniqueHash []string
+	// hash Maps
+	var hashMap = make(map[string]string)
+
+	// check if exclude flag is set
+	if flagExclude != "" {
+		excludeFiles = app.GetExcludeFiles(flagExclude)
+	}
+
 	// check if argument exist or not
 	if len(args) == 0 {
 		fmt.Println("Please provide a path")
@@ -77,27 +101,9 @@ func findRun(cmd *cobra.Command, args []string) {
 		fmt.Println("Please provide only one path")
 		return
 	}
-	// check if exclude flag is set
-	if flagExclude != "" {
-		fmt.Println("Exclude flag is not supported yet")
-		fmt.Println("And will be supported in next release")
-		// if _, err := app.IsValidPath(flagExclude); err != nil {
-		// 	fmt.Println(err)
-		// 	return
-		// }
-	}
+
 	// get path
 	path := args[0]
-	// all files list
-	var allFiles []string
-	// unique files list
-	var uniqueFiles []string
-	// duplicate files list
-	var duplicateFiles []string
-	// unique hashes
-	var uniqueHash []string
-	// hash Maps
-	var hashMap = make(map[string]string)
 
 	//
 	spinIndex := spinner.New(spinner.CharSets[11], 100*time.Millisecond) // Build our new spinner
@@ -121,6 +127,10 @@ func findRun(cmd *cobra.Command, args []string) {
 	spin.Start()                // Start the spinner
 
 	for _, file := range allFiles {
+		excluded := app.IsExcluded(file, excludeFiles, flagOmitEmpty)
+		if excluded {
+			continue
+		}
 		sum, err := app.Sha256sum(file)
 		if err != nil {
 			fmt.Println(err)

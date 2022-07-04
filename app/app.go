@@ -2,6 +2,7 @@ package app
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -36,6 +37,21 @@ func Sha256sum(filename string) (string, error) {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
+}
+
+// Sha256sumChunks will hash last few chunks of the file and return the sha256sum
+func Sha256sumChunks(filename string) (string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.CopyN(hash, file, 1024*1024); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
 // IsDir check if a given path is file or directory
@@ -96,6 +112,36 @@ func GetFiles(path string, recursive bool) ([]string, error) {
 		filepaths = append(filepaths, path+"/"+f.Name())
 	}
 	return filepaths, nil
+}
+
+// GetExcludeFiles will return the files to exclude
+func GetExcludeFiles(exclude string) []string {
+	var excludeFiles []string
+	if exclude == "" {
+		return excludeFiles
+	}
+	excludeFiles = strings.Split(exclude, ",")
+	return excludeFiles
+}
+
+// IsExcluded check if a file is in excluded list
+func IsExcluded(file string, excludedFiles []string, excludeEmpty bool) bool {
+	if excludeEmpty {
+		fileSize, err := GetFileSize(file)
+		if err != nil {
+			panic(err)
+		}
+		if fileSize == 0 {
+			return true
+		}
+	}
+
+	for _, f := range excludedFiles {
+		if strings.Contains(file, f) {
+			return true
+		}
+	}
+	return false
 }
 
 // ContainsString check if string exists in array of string
@@ -179,4 +225,83 @@ func Confirm(message string) bool {
 	default:
 		return false
 	}
+}
+
+// GetFileSize return file size of given file
+func GetFileSize(filename string) (size int64, err error) {
+	fileInfo, err := os.Stat(filename)
+	if err != nil {
+		return 0, err
+	}
+	return fileInfo.Size(), nil
+}
+
+// SoftLink will create a soft link with src and dest
+func SoftLink(src, dest string, force bool) error {
+	if _, err := os.Stat(src); os.IsNotExist(err) {
+		return errors.New("file does not exist")
+	}
+	if _, err := os.Stat(dest); !os.IsNotExist(err) {
+		if !force {
+			return errors.New("file already exists")
+		}
+		if err := os.Remove(dest); err != nil {
+			return err
+		}
+	}
+	if err := os.Symlink(src, dest); err != nil {
+		return err
+	}
+	return nil
+}
+
+// HardLink will create a hard link with src and dest
+func HardLink(src, dest string, force bool) error {
+	if _, err := os.Stat(src); os.IsNotExist(err) {
+		return errors.New("file does not exist")
+	}
+	if _, err := os.Stat(dest); !os.IsNotExist(err) {
+		if !force {
+			return errors.New("file already exists")
+		}
+		if err := os.Remove(dest); err != nil {
+			return err
+		}
+	}
+	if err := os.Link(src, dest); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ReplaceWithLink will replace a file with a link
+func ReplaceWithLink(src, dest string, hard bool) error {
+	if _, err := os.Stat(src); os.IsNotExist(err) {
+		return errors.New("file does not exist")
+	}
+	if _, err := os.Stat(dest); !os.IsNotExist(err) {
+		if err := os.Remove(dest); err != nil {
+			return err
+		}
+	}
+	if hard {
+		return HardLink(src, dest, false)
+	}
+	return SoftLink(src, dest, false)
+}
+
+// CheckChunks will check hash of chunks between two files and compare them
+func CheckChunks(firstFile, secondFile string) (bool, error) {
+	firstFileHash, err := Sha256sumChunks(firstFile)
+	if err != nil {
+		return false, err
+	}
+	secondFileHash, err := Sha256sumChunks(secondFile)
+	if err != nil {
+		return false, err
+	}
+	if firstFileHash == secondFileHash {
+		return true, nil
+	}
+	return false, nil
 }
